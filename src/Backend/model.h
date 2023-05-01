@@ -57,10 +57,13 @@ class Model {
         bool isX(char c) const;
         bool isFuncChar() const;
         bool isSign() const;
+        bool isSign(char c) const;
         bool isOp() const;
         bool isMod() const;
         bool isDot() const;
         bool isDot(char c) const;
+        bool isExp() const;
+        bool isExp(char c) const;
         bool isUnaryOp(); // был const
         bool isNumber(); // был const
         bool isFunc(type_t& funcType); // был const

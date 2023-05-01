@@ -43,6 +43,10 @@ bool Model::isSign() const {
     return *it == '+' || *it == '-';
 }
 
+bool Model::isSign(char c) const {
+    return c == '+' || c == '-';
+}
+
 bool Model::isOp() const {
     return std::string("+-*/^").find(*it) != std::string::npos;
 }
@@ -57,6 +61,14 @@ bool Model::isDot() const {
 
 bool Model::isDot(char c) const {
     return c == '.' || c == ',';
+}
+
+bool Model::isExp() const {
+    return *it == 'e' || *it == 'E';
+}
+
+bool Model::isExp(char c) const {
+    return c == 'e' || c == 'E';
 }
 
 bool Model::isUnaryOp() {
@@ -94,6 +106,13 @@ bool Model::isNumber() {
             if (isDot(*ptr)) {
                 dot ? RESULT_CODE = false : RESULT_CODE = true;
                 dot = true;
+            }
+        }
+        if (isExp(*ptr)) {
+            ++ptr;
+            if (ptr != str.end() && isSign(*ptr)) ++ptr;
+            if (ptr == str.end() || isDot(*ptr) || !isDec(*ptr)) {
+                RESULT_CODE = false;
             }
         }
     }
@@ -203,7 +222,7 @@ void Model::appendNumber() {
     } else {
         std::string temp;
 
-        for (; it != str.end() && (isDec() || isDot()); ++it) {
+        for (; it != str.end() && (isDec() || isDot() || isExp() || (isSign() && isExp(*(it - 1)))); ++it) {
             if (*it == ',') *it = '.';
             temp += *it;
         }

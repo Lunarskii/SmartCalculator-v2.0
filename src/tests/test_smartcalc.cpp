@@ -182,26 +182,89 @@ TEST(SMART_CALCULATOR, NUMBERS36) {
     model.SmartCalculator();
     ASSERT_EQ(model.getResult(), to_string(0.));
 }
-TEST(SMART_CALCULATOR, NUMBERS_X1) {
+
+TEST(SMART_CALCULATOR, X1) {
  Model model("x", 2.5);
     model.SmartCalculator();
  ASSERT_EQ(model.getResult(), to_string(2.5));
 }
-TEST(SMART_CALCULATOR, NUMBERS_X2) {
+TEST(SMART_CALCULATOR, X2) {
  Model model("x + x", 2.5);
     model.SmartCalculator();
  ASSERT_EQ(model.getResult(), to_string(5.));
 }
-TEST(SMART_CALCULATOR, NUMBERS_X3) {
+TEST(SMART_CALCULATOR, X3) {
  Model model("x / x", 2.5);
     model.SmartCalculator();
  ASSERT_EQ(model.getResult(), to_string(1.));
 }
-TEST(SMART_CALCULATOR, NUMBERS_X4) {
+TEST(SMART_CALCULATOR, X4) {
     Model model("x.x", 123);
     model.SmartCalculator();
     ASSERT_EQ(model.getResult(), "ERROR");
 }
+
+TEST(SMART_CALCULATOR, EXP1) {
+    Model model("1e5");
+    model.SmartCalculator();
+    ASSERT_EQ(model.getResult(), to_string(1e5));
+}
+TEST(SMART_CALCULATOR, EXP2) {
+    Model model("-1e5");
+    model.SmartCalculator();
+    ASSERT_EQ(model.getResult(), to_string(-1e5));
+}
+TEST(SMART_CALCULATOR, EXP3) {
+    Model model("1e-5");
+    model.SmartCalculator();
+    ASSERT_EQ(model.getResult(), to_string(1e-5));
+}
+TEST(SMART_CALCULATOR, EXP4) {
+    Model model("-1e-5");
+    model.SmartCalculator();
+    ASSERT_EQ(model.getResult(), to_string(-1e-5));
+}
+TEST(SMART_CALCULATOR, EXP5) {
+    Model model("1.e5");
+    model.SmartCalculator();
+    ASSERT_EQ(model.getResult(), to_string(1.e5));
+}
+TEST(SMART_CALCULATOR, EXP6) {
+    Model model("e");
+    model.SmartCalculator();
+    ASSERT_EQ(model.getResult(), "ERROR");
+}
+TEST(SMART_CALCULATOR, EXP7) {
+    Model model("1e");
+    model.SmartCalculator();
+    ASSERT_EQ(model.getResult(), "ERROR");
+}
+TEST(SMART_CALCULATOR, EXP8) {
+    Model model("1-e5");
+    model.SmartCalculator();
+    ASSERT_EQ(model.getResult(), "ERROR");
+}
+TEST(SMART_CALCULATOR, EXP9) {
+    Model model("1e-.5");
+    model.SmartCalculator();
+    ASSERT_EQ(model.getResult(), "ERROR");
+}
+TEST(SMART_CALCULATOR, EXP10) {
+    Model model("1e.5");
+    model.SmartCalculator();
+    ASSERT_EQ(model.getResult(), "ERROR");
+}
+TEST(SMART_CALCULATOR, EXP11) {
+    Model model("e5");
+    model.SmartCalculator();
+    ASSERT_EQ(model.getResult(), "ERROR");
+}
+TEST(SMART_CALCULATOR, EXP12) {
+    Model model("e-5");
+    model.SmartCalculator();
+    ASSERT_EQ(model.getResult(), "ERROR");
+}
+
 TEST(SMART_CALCULATOR, EMPTY_INPUT_1) {
     Model model(" ");
     model.SmartCalculator();
@@ -212,7 +275,6 @@ TEST(SMART_CALCULATOR, EMPTY_INPUT_2) {
     model.SmartCalculator();
     ASSERT_EQ(model.getResult(), "ERROR");
 }
-
 
  TEST(SMART_CALCULATOR, FUNCTIONS1) {
      Model model("cos(1)");
