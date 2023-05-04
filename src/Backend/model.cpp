@@ -14,6 +14,10 @@ Model::Model(std::string s, value_type x) {
     xValue = x;
 }
 
+Model::Model(value_type amount, value_type percent, int period, int type) : amount(amount), percent(percent), period(period), type(type) {}
+
+Model::Model(value_type amount, value_type percent, value_type tax, int period, int frequency, int capitalization) : amount(amount), percent(percent), tax(tax), period(period), frequency(frequency), capitalization(capitalization) {}
+
 Model::~Model() {
     delete output;
     delete operators;
@@ -437,4 +441,69 @@ void Model::toDouble() {
 
 std::string Model::getResult() const {
     return str;
+}
+
+void Model::CreditCalculator() {
+    if (type == ANNUITY) {
+        long double rate = percent / (long double)1200;
+        long double x = rate * pow(rate + 1, (long double)period) /
+                        (pow(rate + 1, (long double)period) - 1);
+
+        payment = x * amount;
+    } else if (type == DIFFERENTIATED) {
+        long double rate = amount / (long double)period;
+
+        max = rate + amount * percent * 30.42 / 36524.25;
+        min = rate + rate * percent * 30.42 / 36524.25;
+        payment = (max + min) / 2;
+    }
+    totalPayment = payment * (long double)period;
+    overpayment = totalPayment - amount;
+}
+
+typename Model::reference Model::getPayment() {
+    return payment;
+}
+
+typename Model::reference Model::getOverpayment() {
+    return overpayment;
+}
+
+typename Model::reference Model::getTotalPayment() {
+    return totalPayment;
+}
+
+typename Model::reference Model::getMax() {
+    return max;
+}
+
+typename Model::reference Model::getMin() {
+    return min;
+}
+
+void Model::DepositCalculator() {
+    int capitalizationPeriod = 0;
+
+    if (frequency != 0) {
+        capitalizationPeriod = period / frequency;
+    } else {
+        capitalization = 0;
+    }
+    if (capitalization == 0) {
+        payment = (amount * (percent / 100) * (long double)period) / 365.0;
+        invoiceSum = amount;
+    } else {
+        payment = amount * pow(1.0 + (percent / 100) * (long double)frequency / 365.0, (long double)capitalizationPeriod - amount);
+        invoiceSum = amount + payment;
+    }
+    if (percent > 12.5) {
+        tax = payment * (tax / 100);
+    }
+}
+
+typename Model::reference Model::getInvoiceSum() {
+    return invoiceSum;
+}
+typename Model::reference Model::getTax() {
+    return tax;
 }

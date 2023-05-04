@@ -8,6 +8,8 @@
 
 #include <iostream>
 
+#define ANNUITY 1
+#define DIFFERENTIATED 2
 
 typedef enum {
   NUMBER = 0,
@@ -64,9 +66,9 @@ class Model {
         bool isDot(char c) const;
         bool isExp() const;
         bool isExp(char c) const;
-        bool isUnaryOp(); // был const
-        bool isNumber(); // был const
-        bool isFunc(type_t& funcType); // был const
+        bool isUnaryOp();
+        bool isNumber();
+        bool isFunc(type_t& funcType);
         bool isWrongBrackets() const;
         bool isWrongSigns() const;
         bool isWrongX() const;
@@ -96,6 +98,36 @@ class Model {
         value_type xValue;
         Stack* output;
         Stack* operators;
+
+    public:
+        Model(value_type amount, value_type percent, int period, int type);
+        void CreditCalculator();
+        reference getPayment();
+        reference getOverpayment();
+        reference getTotalPayment();
+        reference getMax();
+        reference getMin();
+    private:
+        value_type amount;
+        value_type percent;
+        value_type payment;
+        value_type overpayment;
+        value_type totalPayment;
+        value_type max;
+        value_type min;
+        int period;
+        int type;
+
+    public:
+        Model(value_type amount, value_type percent, value_type tax, int period, int frequency, int capitalization);
+        void DepositCalculator();
+        reference getInvoiceSum();
+        reference getTax();
+    private:
+        value_type tax;
+        value_type invoiceSum;
+        int frequency;
+        int capitalization;
 };
 
 class Model::Stack {
