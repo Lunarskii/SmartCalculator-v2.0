@@ -23,7 +23,20 @@ SRC_TESTS					:= $(wildcard $(SRC_TESTS_DIR)*.cpp)
 OBJ_BACKEND					:= $(patsubst %.cpp, $(OBJ_BACKEND_DIR)%.o, $(notdir $(SRC_BACKEND)))
 OBJ_TESTS					:= $(patsubst %.cpp, $(OBJ_TESTS_DIR)%.o, $(notdir $(SRC_TESTS)))
 
-all: $(BACKEND_LIBRARY) test clean
+all: install uninstall
+
+install:
+	cmake -B build
+	make -C build
+	cp build/untitled SmartCalculator
+	make launch
+
+uninstall: clean
+	rm -rf build
+	rm -rf SmartCalculator
+
+launch:
+	./SmartCalculator
 
 $(BACKEND_LIBRARY): $(OBJ_BACKEND)
 	ar rc $(BACKEND_LIBRARY) $(OBJ_BACKEND)
