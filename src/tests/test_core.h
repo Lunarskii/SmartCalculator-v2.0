@@ -3,6 +3,8 @@
 
 #include <gtest/gtest.h>
 
-#include "../Backend/model.h"
+#include "../model/model.h"
+
+using namespace s21;
 
 // #endif  // SRC_TESTS_TEST_CORE_H_

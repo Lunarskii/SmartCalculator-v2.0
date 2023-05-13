@@ -182,6 +182,16 @@ TEST(SMART_CALCULATOR, NUMBERS36) {
     model.SmartCalculator();
     ASSERT_EQ(model.getResult(), to_string(0.));
 }
+TEST(SMART_CALCULATOR, NUMBERS37) {
+    Model model("123*/123");
+    model.SmartCalculator();
+    ASSERT_EQ(model.getResult(), "ERROR");
+}
+TEST(SMART_CALCULATOR, NUMBERS38) {
+    Model model("-0.25^3");
+    model.SmartCalculator();
+    ASSERT_EQ(model.getResult(), to_string(-0.015625));
+}
 
 TEST(SMART_CALCULATOR, X1) {
  Model model("x", 2.5);
@@ -200,6 +210,11 @@ TEST(SMART_CALCULATOR, X3) {
 }
 TEST(SMART_CALCULATOR, X4) {
     Model model("x.x", 123);
+    model.SmartCalculator();
+    ASSERT_EQ(model.getResult(), "ERROR");
+}
+TEST(SMART_CALCULATOR, X5) {
+    Model model("xx", 123);
     model.SmartCalculator();
     ASSERT_EQ(model.getResult(), "ERROR");
 }
