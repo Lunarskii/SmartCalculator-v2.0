@@ -1,12 +1,14 @@
 #include "view.h"
-#include "ui_view.h"
+
+namespace s21 {
 
 View::View(Controller* c, QWidget* parent)
     : controller(c)
     , QMainWindow(parent)
-    , ui(new Ui::View)
+    , ui(new s21::View)
 {
     ui->setupUi(this);
+    setlocale(LC_NUMERIC, "C");
 
     // Создаем три экземпляра калькуляторов
     smartView = new SmartView(controller);
@@ -33,3 +35,5 @@ View::~View()
     delete depositView;
     delete ui;
 }
+
+}  // namespace s21

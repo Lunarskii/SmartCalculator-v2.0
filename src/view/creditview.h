@@ -1,24 +1,30 @@
-#ifndef CREDITCALCULATOR_H
-#define CREDITCALCULATOR_H
+#ifndef CPP3_SMARTCALC_V2_0_VIEW_CREDITCALCULATOR_H_
+#define CPP3_SMARTCALC_V2_0_VIEW_CREDITCALCULATOR_H_
 
 #include <QWidget>
 #include "../controller/controller.h"
+#include ".ui/ui_creditview.h"
 
-namespace Ui {
-class CreditView;
-}
+namespace s21 { class CreditView; }
 
-class CreditView : public QWidget
+namespace s21 {
+
+class CreditView : public QWidget, public Ui_CreditView
 {
     Q_OBJECT
 
 public:
-    explicit CreditView(Controller* c, QWidget *parent = nullptr);
+    explicit CreditView(Controller* c = nullptr, QWidget *parent = nullptr);
     ~CreditView();
 
+private slots:
+    void on_creditEqual_clicked();
+
 public:
-    Ui::CreditView *ui;
+    s21::CreditView *ui;
     Controller* controller;
 };
 
-#endif // CREDITCALCULATOR_H
+}  // namespace s21
+
+#endif  // CPP3_SMARTCALC_V2_0_VIEW_CREDITCALCULATOR_H_

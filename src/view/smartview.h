@@ -1,20 +1,21 @@
-#ifndef SMARTCALCULATOR_H
-#define SMARTCALCULATOR_H
+#ifndef CPP3_SMARTCALC_V2_0_VIEW_SMARTCALCULATOR_H_
+#define CPP3_SMARTCALC_V2_0_VIEW_SMARTCALCULATOR_H_
 
 #include <QWidget>
 #include "qcustomplot.h"
 #include "../controller/controller.h"
+#include ".ui/ui_smartview.h"
 
-QT_BEGIN_NAMESPACE
-namespace Ui { class SmartView; }
-QT_END_NAMESPACE
+namespace s21 { class SmartView; }
 
-class SmartView : public QWidget
+namespace s21 {
+
+class SmartView : public QWidget, public Ui_SmartView
 {
     Q_OBJECT
 
 public:
-    SmartView(Controller* c, QWidget *parent = nullptr);
+    SmartView(Controller* c = nullptr, QWidget *parent = nullptr);
     ~SmartView();
 
 private slots:
@@ -23,7 +24,10 @@ private slots:
     void on_pushButton_PLOT_clicked();
 
 public:
-    Ui::SmartView *ui;
+    s21::SmartView *ui;
     Controller* controller;
 };
-#endif // SMARTCALCULATOR_H
+
+}  // namespace s21
+
+#endif  // CPP3_SMARTCALC_V2_0_VIEW_SMARTCALCULATOR_H_

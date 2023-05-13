@@ -1,10 +1,11 @@
 #include "smartview.h"
-#include "ui_smartview.h"
+
+namespace s21 {
 
 SmartView::SmartView(Controller* c, QWidget *parent)
     : controller(c)
     , QWidget(parent)
-    , ui(new Ui::SmartView)
+    , ui(new s21::SmartView)
 {
     ui->setupUi(this);
 
@@ -113,3 +114,5 @@ void SmartView::on_pushButton_PLOT_clicked()
         ui->customPlot->replot();
     }
 }
+
+}  // namespace s21
