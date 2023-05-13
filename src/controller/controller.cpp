@@ -1,5 +1,7 @@
 #include "controller.h"
 
+namespace s21 {
+
 void Controller::setSmartCalculatorData(std::string e, long double xValue) {
     model->setValues(e, xValue);
     model->SmartCalculator();
@@ -11,10 +13,20 @@ void Controller::setCreditCalculatorData(long double amount, long double percent
     model->CreditCalculator();
 }
 
-void Controller::setDepositCalculatorData(long double amount, int period, long double rate, long double taxRate, int paymentFrequency, bool capitalization)
+void Controller::setDepositCalculatorData(long double amount, int period, long double rate, long double taxRate, long double paymentFrequency, bool capitalization)
 {
     model->setValues(amount, period, rate, taxRate, paymentFrequency, capitalization);
     model->DepositCalculator();
+}
+
+void Controller::addDeposit(long double amount, int frequency)
+{
+    model->pushDeposit(amount, frequency);
+}
+
+void Controller::addWithdrawal(long double amount, int frequency)
+{
+    model->pushWithdrawal(amount, frequency);
 }
 
 long double& Controller::getPayment()
@@ -60,3 +72,5 @@ long double& Controller::getAmount()
 std::string Controller::getResult() {
     return model->getResult();
 }
+
+}  // namespace s21
