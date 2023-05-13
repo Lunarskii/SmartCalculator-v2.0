@@ -1,5 +1,7 @@
 #include "model.h"
 
+namespace s21 {
+
 Model::Stack::Stack() : peak(nullptr) {}
 
 Model::Stack::~Stack() {
@@ -82,3 +84,5 @@ void Model::Stack::clear()
 {
     this->~Stack();
 }
+
+}  // namespace s21

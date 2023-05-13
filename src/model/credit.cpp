@@ -1,5 +1,7 @@
 #include "model.h"
 
+namespace s21 {
+
 Model::Model(value_type amount, value_type percent, int period, int type) 
     : amount(amount)
     , percent(percent)
@@ -18,8 +20,12 @@ void Model::CreditCalculator()
     } else if (type == DIFFERENTIATED) {
         long double rate = amount / (long double)period;
 
-        max = rate + amount * percent * 30.42 / 36524.25;
-        min = rate + rate * percent * 30.42 / 36524.25;
+        max = round((rate + amount * percent * 30.42 / 36524.25) * 100) / 100;
+        min = round((rate + rate * percent * 30.42 / 36524.25) * 100) / 100;
+
+        // min = amount / period + (amount - (period - 1) * amount / period) * (percent / 12);
+        // max = round((amount / period + amount * (percent / 12)) * 10) / 100;
+
         payment = round((max + min) / 2 * 100) / 100;
     }
     totalPayment = round(payment * (long double)period * 100) / 100;
@@ -58,3 +64,5 @@ void Model::setValues(value_type amount, value_type percent, int period, int typ
     this->period = period;
     this->type = type;
 }
+
+}  // namespace s21

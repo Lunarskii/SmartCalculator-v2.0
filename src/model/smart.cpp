@@ -1,5 +1,7 @@
 #include "model.h"
 
+namespace s21 {
+
 Model::Stack::Node::Node(const_reference d, const int& priority, type_t t, Node* prev) 
     : data(d)
     , priority(priority)
@@ -176,6 +178,8 @@ bool Model::isWrongSigns() const {
     for (auto ptr = it; ptr != str.end(); ++ptr) {
         if (*ptr == '(' && (std::string("*/^").find(*(ptr + 1)) != std::string::npos)) {
             return true;
+        } else if ((*ptr == '*' && *(ptr + 1) == '/') || (*ptr == '/' && *(ptr + 1) == '*')) {
+            return true;
         }
     }
 
@@ -188,7 +192,7 @@ bool Model::isWrongX() const {
             char prev = (std::distance(str.begin(), ptr) > 0) ? *(ptr - 1) : *ptr;
             char next = *(ptr + 1);
 
-            if (isX(*ptr) && (isDot(prev) || isDot(next))) {
+            if (isX(*ptr) && ((isDot(prev) || isDot(next)) || isX(next))) {
                 return true;
             }
         }
@@ -477,3 +481,5 @@ typename Model::Model& Model::operator=(Model& other) {
 
     return *this;
 }
+
+}  // namespace s21

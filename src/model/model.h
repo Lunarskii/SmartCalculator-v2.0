@@ -9,6 +9,8 @@
 #include <cmath>    // для математическиих функций
 #include <list>
 
+namespace s21 {
+
 #define ANNUITY 1
 #define DIFFERENTIATED 2
 
@@ -137,19 +139,19 @@ private:
     int type{};
 
 public:
-    Model(value_type amount, int period, value_type rate, value_type taxRate, int paymentFrequency, bool capitalization);
+    Model(value_type amount, int period, value_type rate, value_type taxRate, value_type paymentFrequency, bool capitalization);
     void DepositCalculator();
     void pushDeposit(value_type amount, int frequency);
     void pushWithdrawal(value_type amount, int frequency);
     reference getEarnedInterest();
     reference getTax();
     reference getAmount();
-    void setValues(value_type amount, int period, value_type rate, value_type taxRate, int paymentFrequency, bool capitalization);
+    void setValues(value_type amount, int period, value_type rate, value_type taxRate, value_type paymentFrequency, bool capitalization);
 private:
     value_type getInterest();
-    double rate{};
-    double taxRate{};
-    int paymentFrequency{};
+    value_type rate{};
+    value_type taxRate{};
+    value_type paymentFrequency{};
     bool capitalization{};
     std::list<ListNode> deposits;
     std::list<ListNode> withdrawals;
@@ -196,5 +198,7 @@ public: // private
     type_t type;
     Node* prev;
 };
+
+}  // namespace s21
 
 #endif  // CPP3_SMARTCALC_V2_0_MODEL_MODEL_H_
