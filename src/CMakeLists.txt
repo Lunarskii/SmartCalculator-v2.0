@@ -5,7 +5,6 @@ project(untitled VERSION 0.1 LANGUAGES CXX)
 set(CMAKE_PREFIX_PATH "/usr/local/qt;/opt/qt;$ENV{QT_INSTALL_DIR};$ENV{QTDIR};~/Qt/")
 set(CMAKE_PREFIX_PATH "/home/lunarskii/Qt/6.4.2/gcc_64/lib/cmake")
 
-set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
@@ -28,23 +27,47 @@ set(PROJECT_SOURCES
 
         view/view.cpp
         view/view.h
-        view/view.ui
         view/smartview.cpp
         view/smartview.h
-        view/smartview.ui
         view/creditview.cpp
         view/creditview.h
-        view/creditview.ui
         view/depositview.cpp
         view/depositview.h
-        view/depositview.ui
         view/qcustomplot.cpp
         view/qcustomplot.h
+
+        view/.ui/view.ui
+        view/.ui/smartview.ui
+        view/.ui/creditview.ui
+        view/.ui/depositview.ui
+
+        view/.ui/ui_view.h
+        view/.ui/ui_smartview.h
+        view/.ui/ui_creditview.h
+        view/.ui/ui_depositview.h
 
         controller/controller.cpp
         controller/controller.h
 
         main.cpp
+)
+
+set(TEST_SOURCES
+        model/smart.cpp
+        model/credit.cpp
+        model/deposit.cpp
+        model/stack.cpp
+        model/model.h
+
+        tests/test_core.cpp
+        tests/test_core.h
+        tests/test_smartcalc.cpp
+        tests/test_creditcalc.cpp
+        tests/test_depositcalc.cpp
+)
+
+add_executable(tests 
+        ${TEST_SOURCES}
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -73,7 +96,10 @@ endif()
 target_link_libraries(untitled PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 target_link_libraries(untitled PUBLIC Qt${QT_VERSION_MAJOR}::PrintSupport)
 target_link_libraries(untitled PRIVATE Qt${QT_VERSION_MAJOR}::Gui)
-target_link_libraries(untitled PRIVATE ${GTEST_LIBRARIES} pthread)
+target_link_libraries(tests PRIVATE ${GTEST_LIBRARIES} pthread)
+
+include(GoogleTest)
+gtest_discover_tests(tests)
 
 set_target_properties(untitled PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
