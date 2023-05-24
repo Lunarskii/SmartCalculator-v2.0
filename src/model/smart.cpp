@@ -2,20 +2,20 @@
 
 namespace s21 {
 
-Model::Stack::Node::Node(const_reference d, const int& priority, type_t t, Node* prev) 
-    : data(d)
-    , priority(priority)
-    , type(t)
-    , prev(prev) 
+Model::Stack::Node::Node(const_reference d, const int& priority, type_t t, Node* prev)
+        : data(d)
+        , priority(priority)
+        , type(t)
+        , prev(prev)
 {}
 
-Model::Model() 
+Model::Model()
 {
     output = new Stack;
     operators = new Stack;
 }
 
-Model::Model(std::string s) 
+Model::Model(std::string s)
 {
     str = s;
     it = str.begin();
@@ -23,20 +23,20 @@ Model::Model(std::string s)
     operators = new Stack;
 }
 
-Model::Model(std::string s, value_type x) 
+Model::Model(std::string s, value_type x)
 {
     new (this) Model(s);
     xValue = x;
 }
 
-Model::Model(Model& other) 
+Model::Model(Model& other)
 {
     str = other.str;
     it = other.it;
     xValue = other.xValue;
 }
 
-Model::~Model() 
+Model::~Model()
 {
     delete output;
     delete operators;
@@ -79,11 +79,11 @@ bool Model::isMod() const {
 }
 
 bool Model::isDot() const {
-    return *it == '.' || *it == ',';
+    return *it == '.';
 }
 
 bool Model::isDot(char c) const {
-    return c == '.' || c == ',';
+    return c == '.';
 }
 
 bool Model::isExp() const {
@@ -248,7 +248,6 @@ void Model::appendNumber() {
         std::string temp;
 
         for (; it != str.end() && (isDec() || isDot() || isExp() || (isSign() && isExp(*(it - 1)))); ++it) {
-            if (*it == ',') *it = '.';
             temp += *it;
         }
         output->push(std::stold(temp) * sign);
@@ -324,6 +323,7 @@ void Model::spliceFull() {
 
 void Model::SmartCalculator() {
     str.erase(std::remove_if(str.begin(), str.end(), [](char c) { return std::isspace(c); }), str.end());
+    std::replace(str.begin(), str.end(), ',', '.');
 
     if (str.empty() || isWrongBrackets() || isWrongSigns() || isWrongX()) {
         str = "ERROR";

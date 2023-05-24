@@ -9,6 +9,9 @@
 #include <cmath>    // для математическиих функций
 #include <list>
 
+#include <cstdio>
+#include <iostream>
+
 namespace s21 {
 
 #define ANNUITY 1
