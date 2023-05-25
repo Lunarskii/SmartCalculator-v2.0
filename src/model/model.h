@@ -70,7 +70,6 @@ public:
     Model(Model& other);
     ~Model();
 
-    // посмотреть правила именования функций
     bool isDec() const;
     bool isDec(char c) const;
     bool isX() const;
@@ -112,8 +111,6 @@ public:
     void calcOperations(value_type& operand1, value_type& operand2, type_t type, value_type& result);
 
     void setValues(std::string newString, value_type x);
-
-    Model& operator=(Model& other);
 private:
     std::string str{};
     std::string::iterator it{str.begin()};
@@ -176,7 +173,6 @@ public:
 
     void push(const_reference data, type_t type = NUMBER, int priority = 0);
     void pop();
-    value_type top() const; // по сути вообще не нужен
     size_type size() const;
     void moveElement(Stack& other);
     void spliceOperators(Stack& other);
@@ -195,7 +191,6 @@ private:
 class Model::Stack::Node {
 public:
     Node(const_reference d, const int& priority, type_t t, Node* prev = nullptr);
-public: // private
     value_type data;
     int priority;
     type_t type;

@@ -30,10 +30,8 @@ void Model::pushWithdrawal(value_type amount, int frequency)
     withdrawals.emplace_back(amount, frequency);
 }
 
-// Функция для расчета процентов по вкладу
 typename Model::value_type Model::getInterest()
 {   
-    // cout << "amount = " << amount << ", rate = " << rate << ", paymentFrequency = " << paymentFrequency << ", return = " << amount * rate / paymentFrequency << endl;
     return amount * rate / paymentFrequency;
 }
 

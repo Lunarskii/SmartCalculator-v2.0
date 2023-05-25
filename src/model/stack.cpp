@@ -25,14 +25,6 @@ void Model::Stack::pop() {
     }
 }
 
-typename Model::Stack::value_type Model::Stack::top() const {
-    if (peak != nullptr) {
-        return peak->data;
-    } else {
-        return value_type{};
-    }
-}
-
 typename Model::Stack::size_type Model::Stack::size() const {
     size_type size = 0;
 

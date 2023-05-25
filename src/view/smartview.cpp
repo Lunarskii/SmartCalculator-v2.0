@@ -19,19 +19,15 @@ SmartView::SmartView(Controller* c, QWidget *parent)
     connect(ui->pushButton_7, SIGNAL(clicked()), this, SLOT(updateExpressionWindow()));
     connect(ui->pushButton_8, SIGNAL(clicked()), this, SLOT(updateExpressionWindow()));
     connect(ui->pushButton_9, SIGNAL(clicked()), this, SLOT(updateExpressionWindow()));
-
     connect(ui->pushButton_plus, SIGNAL(clicked()), this, SLOT(updateExpressionWindow()));
     connect(ui->pushButton_minus, SIGNAL(clicked()), this, SLOT(updateExpressionWindow()));
     connect(ui->pushButton_mult, SIGNAL(clicked()), this, SLOT(updateExpressionWindow()));
     connect(ui->pushButton_div, SIGNAL(clicked()), this, SLOT(updateExpressionWindow()));
     connect(ui->pushButton_power, SIGNAL(clicked()), this, SLOT(updateExpressionWindow()));
-
     connect(ui->pushButton_dot, SIGNAL(clicked()), this, SLOT(updateExpressionWindow()));
     connect(ui->pushButton_lbracket, SIGNAL(clicked()), this, SLOT(updateExpressionWindow()));
     connect(ui->pushButton_rbracket, SIGNAL(clicked()), this, SLOT(updateExpressionWindow()));
-
     connect(ui->pushButton_x, SIGNAL(clicked()), this, SLOT(updateExpressionWindow()));
-
     connect(ui->pushButton_cos, SIGNAL(clicked()), this, SLOT(updateExpressionWindow()));
     connect(ui->pushButton_sin, SIGNAL(clicked()), this, SLOT(updateExpressionWindow()));
     connect(ui->pushButton_tan, SIGNAL(clicked()), this, SLOT(updateExpressionWindow()));
@@ -87,7 +83,7 @@ void SmartView::on_pushButton_PLOT_clicked()
         QVector<double> x(1024), y(1024);
         QPen bluePen;
 
-        for (int i = 0; i < 1024; ++i) {
+        for (int i = 0; RESULT_CODE && i < 1024; ++i) {
           x[i] = minX + rangeX * (i / 1024.0);
           controller->setSmartCalculatorData(expression, x[i]);
 
@@ -95,23 +91,26 @@ void SmartView::on_pushButton_PLOT_clicked()
             y[i] = INFINITY;
           else if (controller->getResult() == "-nan")
             y[i] = NAN;
+          else if (controller->getResult() == "ERROR")
+            RESULT_CODE = false;
           else
             y[i] = stod(controller->getResult());
         }
 
-        ui->customPlot->addGraph();
-        bluePen.setColor(QColor(30, 40, 255, 150));
-        bluePen.setStyle(Qt::SolidLine);
-        bluePen.setWidthF(5);
-        ui->customPlot->graph(0)->setPen(bluePen);
-        ui->customPlot->graph(0)->setData(x, y);
-        // give the axes some labels:
-        ui->customPlot->xAxis->setLabel("x");
-        ui->customPlot->yAxis->setLabel("y");
-        // set axes ranges, so we see all data:
-        ui->customPlot->xAxis->setRange(minX, maxX);
-        ui->customPlot->yAxis->setRange(minY, maxY);
-        ui->customPlot->replot();
+        if (RESULT_CODE)
+        {
+            ui->customPlot->addGraph();
+            bluePen.setColor(QColor(30, 40, 255, 150));
+            bluePen.setStyle(Qt::SolidLine);
+            bluePen.setWidthF(5);
+            ui->customPlot->graph(0)->setPen(bluePen);
+            ui->customPlot->graph(0)->setData(x, y);
+            ui->customPlot->xAxis->setLabel("x");
+            ui->customPlot->yAxis->setLabel("y");
+            ui->customPlot->xAxis->setRange(minX, maxX);
+            ui->customPlot->yAxis->setRange(minY, maxY);
+            ui->customPlot->replot();
+        }
     }
 }
 

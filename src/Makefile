@@ -11,6 +11,7 @@ install:
 uninstall: clean
 	rm -rf build
 	rm -rf $(APP_NAME)
+	rm -rf $(APP_NAME).tar.gz
 
 clean:
 	rm -rf valgrind.txt
@@ -29,7 +30,8 @@ tests: install
 	./build/tests
 
 clang:
-	clang-format --style=google -i $(SRC_PROJECT_DIR)*
-	clang-format --style=google -i $(SRC_TEST_DIR)*
+	clang-format --style=google -i controller/*
+	clang-format --style=google -i model/*
+	clang-format --style=google -i view/*view*
 
 .PHONY: all install uninstall clean dvi dist launch tests clang valgrind

@@ -341,8 +341,7 @@ bool Model::toPolishNotation() {
         if (isNumber()) {
             appendNumber();
         } else if (type_t funcType = NUMBER; isFunc(funcType)) {
-            bool RESULT_CODE = appendFunc(funcType);
-            if (!RESULT_CODE) return false;
+            if (!appendFunc(funcType)) return false;
         } else if (*it == '(') {
             appendBracket();
         } else if (isOp() || isMod()) {
@@ -471,15 +470,6 @@ void Model::setValues(std::string newString, value_type x)
     xValue = x;
     output->clear();
     operators->clear();
-}
-
-typename Model::Model& Model::operator=(Model& other) {
-    if (this != &other) {
-        this->~Model();
-        new (this) Model(other);
-    }
-
-    return *this;
 }
 
 }  // namespace s21
