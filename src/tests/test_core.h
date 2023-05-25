@@ -1,5 +1,5 @@
-// #ifndef SRC_TESTS_TEST_CORE_H_
-// #define SRC_TESTS_TEST_CORE_H_
+#ifndef CPP3_SMARTCALC_V2_0_TESTS_TEST_CORE_H_
+#define CPP3_SMARTCALC_V2_0_TESTS_TEST_CORE_H_
 
 #include <gtest/gtest.h>
 
@@ -7,4 +7,4 @@
 
 using namespace s21;
 
-// #endif  // SRC_TESTS_TEST_CORE_H_
+#endif  // CPP3_SMARTCALC_V2_0_TESTS_TEST_CORE_H_
