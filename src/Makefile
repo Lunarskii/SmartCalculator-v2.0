@@ -3,6 +3,18 @@ APP_NAME					= SmartCalculator
 
 all: install
 
+build:
+	g++ -c model/*.cpp
+	ar rc lib.a *.o
+	ranlib lib.a
+	rm -rf *.o
+	g++ -c tests/*.cpp
+	g++ *.o -o test_test lib.a -DGTEST_HAS_PTHREAD=1 -lgtest
+	rm -rf *.o
+	./test_test
+	rm -rf test_test
+	rm -rf lib.a
+
 install:
 	cmake -B build
 	make -C build untitled
