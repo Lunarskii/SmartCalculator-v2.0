@@ -2,12 +2,7 @@
 
 namespace s21 {
 
-ListNode::ListNode(double amount, int frequency) 
-    : amount(amount)
-    , frequency(frequency) 
-{}
-
-Model::Model(value_type amount, int period, value_type rate, value_type taxRate, value_type paymentFrequency, bool capitalization) 
+Model::Model(long double amount, int period, long double rate, long double taxRate, long double paymentFrequency, bool capitalization) 
     : amount(amount)
     , period(period)
     , rate(rate)
@@ -20,32 +15,32 @@ Model::Model(value_type amount, int period, value_type rate, value_type taxRate,
     interest = 0;
 }
 
-void Model::pushDeposit(value_type amount, int frequency)
+void Model::pushDeposit(long double amount, int frequency)
 {
     deposits.emplace_back(amount, frequency);
 }
 
-void Model::pushWithdrawal(value_type amount, int frequency)
+void Model::pushWithdrawal(long double amount, int frequency)
 {
     withdrawals.emplace_back(amount, frequency);
 }
 
-typename Model::value_type Model::getInterest()
+long double Model::getInterest()
 {   
     return amount * rate / paymentFrequency;
 }
 
-typename Model::reference Model::getEarnedInterest()
+long double& Model::getEarnedInterest()
 {
     return interest;
 }
 
-typename Model::reference Model::getTax()
+long double& Model::getTax()
 {
     return tax;
 }
 
-typename Model::reference Model::getAmount()
+long double& Model::getAmount()
 {
     return amount;
 }
@@ -97,7 +92,7 @@ void Model::DepositCalculator()
     withdrawals.clear();
 }
 
-void Model::setValues(value_type amount, int period, value_type rate, value_type taxRate, value_type paymentFrequency, bool capitalization)
+void Model::setValues(long double amount, int period, long double rate, long double taxRate, long double paymentFrequency, bool capitalization)
 {
     this->amount = amount;
     this->period = period;

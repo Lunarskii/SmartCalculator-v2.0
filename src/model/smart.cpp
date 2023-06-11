@@ -2,28 +2,13 @@
 
 namespace s21 {
 
-Model::Stack::Node::Node(const_reference d, const int& priority, type_t t, Node* prev)
-        : data(d)
-        , priority(priority)
-        , type(t)
-        , prev(prev)
-{}
-
-Model::Model()
-{
-    output = new Stack;
-    operators = new Stack;
-}
-
 Model::Model(std::string s)
 {
     str = s;
     it = str.begin();
-    output = new Stack;
-    operators = new Stack;
 }
 
-Model::Model(std::string s, value_type x)
+Model::Model(std::string s, long double x)
 {
     new (this) Model(s);
     xValue = x;
@@ -34,12 +19,6 @@ Model::Model(Model& other)
     str = other.str;
     it = other.it;
     xValue = other.xValue;
-}
-
-Model::~Model()
-{
-    delete output;
-    delete operators;
 }
 
 bool Model::isDec() const {
@@ -113,43 +92,48 @@ bool Model::isUnaryOp() {
 }
 
 bool Model::isNumber() {
-    bool RESULT_CODE = false;
+    std::string value;
     auto ptr = it;
 
-    if (isUnaryOp()) { // попробовать убрать true
-        RESULT_CODE = true;
-        ++ptr;
+    if (isUnaryOp())
+    {
+        value += *(ptr++);
     }
 
-    if (isX(*ptr)) {
-        RESULT_CODE = true;
-    } else if (isDec(*ptr) || isDot(*ptr)) {
-        RESULT_CODE = true;
-        for (bool dot = false; RESULT_CODE && ptr != str.end() && (isDec(*ptr) || isDot(*ptr)); ++ptr) {
-            if (isDot(*ptr)) {
-                dot ? RESULT_CODE = false : RESULT_CODE = true;
-                dot = true;
-            }
-        }
-        if (isExp(*ptr)) {
-            ++ptr;
-            if (ptr != str.end() && isSign(*ptr)) ++ptr;
-            if (ptr == str.end() || isDot(*ptr) || !isDec(*ptr)) {
-                RESULT_CODE = false;
-            }
-        }
+    for (; ptr != str.end() && (isDec(*ptr) || isDot(*ptr) || (isSign(*ptr) && isExp(*(ptr - 1))) || isExp(*ptr)); ++ptr) {
+        value += *ptr;
     }
 
-    return RESULT_CODE;
+    try 
+    {
+        std::size_t pos = 0;
+        long double st = std::stold(value, &pos);
+
+        if (pos == static_cast<std::size_t>(-1) || pos == value.size())
+        {
+            output.emplace(st);
+        }
+        else
+        {
+            return false;
+        }
+    }
+    catch (const std::exception& e)
+    {
+        return false;
+    }
+
+    it += value.size();
+    return true;
 }
 
-bool Model::isFunc(type_t& funcType) {
+bool Model::isFunc(int& funcType) {
     std::string functions[9] = {"cos(",  "sin(",  "tan(", "acos(", "asin(",
                                 "atan(", "sqrt(", "ln(",  "log("};
 
-    for (size_type i = 0; i < sizeof(functions) / sizeof(std::string); ++i) {
+    for (std::size_t i = 0; i < sizeof(functions) / sizeof(std::string); ++i) {
         if (!str.compare(std::distance(str.begin(), it), functions[i].size(), functions[i])) {
-            funcType = (type_t)(COS + i);
+            funcType = (kCos + i);
             return true;
         }
     }
@@ -217,47 +201,25 @@ int Model::detPriority(char c) const {
 
 int Model::detOp(char c) const {
     if (c == '+') {
-        return PLUS;
+        return kPlus;
     } else if (c == '-') {
-        return MINUS;
+        return kMinus;
     } else if (c == '*') {
-        return MULT;
+        return kMult;
     } else if (c == '/') {
-        return DIV;
+        return kDiv;
     } else if (c == '^') {
-        return POWER;
+        return kPower;
     } else if (c == 'm') {
-        return MOD;
+        return kMod;
     }
 
     return 0;
 }
 
-void Model::appendNumber() {
-    int sign = 1;
-
-    if (isSign()) {
-        if (*it == '-') sign = -1;
-        ++it;
-    }
-
-    if (isX()) {
-        output->push(xValue * sign);
-        ++it;
-    } else {
-        std::string temp;
-
-        for (; it != str.end() && (isDec() || isDot() || isExp() || (isSign() && isExp(*(it - 1)))); ++it) {
-            temp += *it;
-        }
-        output->push(std::stold(temp) * sign);
-    }
-}
-
-bool Model::appendFunc(type_t& funcType) {
+bool Model::appendFunc(int& funcType) {
     std::string temp;
 
-//    while (*(it - 1) != '(') ++it;
     while (*it != '(') ++it;
     ++it;
 
@@ -275,13 +237,16 @@ bool Model::appendFunc(type_t& funcType) {
     Model tempObj(temp, xValue);
     tempObj.SmartCalculator();
 
-    tempObj.it = tempObj.str.begin();
-    if (tempObj.isNumber()) {
-        output->push(std::stold(tempObj.getResult()), funcType);
-        return true;
+    try 
+    {
+        output.emplace(calcFunctions(funcType, std::stold(tempObj.getResult())));
     }
-    // возможно тут  вообще  не нужны никакие  проверки для  nan,  inf  и т.п.,  так  как  stold и  to_string все нормально  обрабатывают
-    return false;
+    catch (const std::exception& e)
+    {
+        return false;
+    }
+    
+    return true;
 }
 
 void Model::appendOp() {
@@ -289,35 +254,35 @@ void Model::appendOp() {
     char beforePrev = *(it++ - 1);
 
     if (!isDec(beforePrev) && prev == '-' && *it == '(') {
-        output->push(-1);
+        output.emplace(-1);
         prev = '*';
     } else if (prev == '-' && isFuncChar()) {
-        output->push(0);
+        output.emplace(0);
         prev = '-';
     }
-    while (operators->getNode() != nullptr && detPriority(prev) <= operators->getPriority()) {
-        output->moveElement(*operators);
+    while (operators.size() != 0 && detPriority(prev) <= operators.top().priority) {
+        moveElement(operators, output);
     }
-    operators->push(0, (type_t)detOp(prev), detPriority(prev));
+    operators.emplace(0, detPriority(prev), detOp(prev));
     if (prev == 'm') it += 2;
 }
 
 void Model::appendBracket() {
-    operators->push(0, LBRACKET);
+    operators.emplace(0, 0, kLbracket);
     ++it;
 }
 
 void Model::splice() {
-    while (operators->getType() != LBRACKET) {
-        output->moveElement(*operators);
+    while (operators.top().type != kLbracket) {
+        moveElement(operators, output);
     }
-    operators->pop();
+    operators.pop();
     ++it;
 }
 
 void Model::spliceFull() {
-    while (operators->getNode() != nullptr) {
-        output->moveElement(*operators);
+    while (operators.size() != 0) {
+        moveElement(operators, output);
     }
 }
 
@@ -328,6 +293,7 @@ void Model::SmartCalculator() {
     if (str.empty() || isWrongBrackets() || isWrongSigns() || isWrongX()) {
         str = "ERROR";
     } else {
+        replaceX();
         if (toPolishNotation()) {
             toDouble();
         } else {
@@ -339,8 +305,8 @@ void Model::SmartCalculator() {
 bool Model::toPolishNotation() {
     while (it != str.end()) {
         if (isNumber()) {
-            appendNumber();
-        } else if (type_t funcType = NUMBER; isFunc(funcType)) {
+            
+        } else if (int funcType = kNumber; isFunc(funcType)) {
             if (!appendFunc(funcType)) return false;
         } else if (*it == '(') {
             appendBracket();
@@ -357,105 +323,84 @@ bool Model::toPolishNotation() {
     return true;
 }
 
-void Model::numberProcessing(Stack& temp) {
-    value_type operand1 = output->getData();
-    value_type operand2 = 0;
-    value_type result = 0;
+void Model::numberProcessing(std::stack<StackNode>& temp) {
+    long double operand1 = output.top().data;
+    long double operand2 = 0;
+    long double result = 0;
 
-    output->pop();
-    if (isOperator(output->getType())) {
-        temp.push(operand1);
-        while (isOperator(output->getType())) {
-            temp.moveElement(*output);
+    output.pop();
+    if (isOperator(output.top().type)) {
+        temp.emplace(operand1);
+        while (isOperator(output.top().type)) {
+            moveElement(output, temp);
         }
-    } else if (isFunction(output->getType()) || output->getType() == NUMBER) {
-        if (isFunction(output->getType())) {
-            calcFunctions(result);
-            operand2 = result;
-        } else if (output->getType() == NUMBER) {
-            operand2 = output->getData();
-        }
-        output->pop();
-        calcOperations(operand2, operand1, temp.getType(), result);
+    } else if (output.top().type == kNumber) {
+        operand2 = output.top().data;
+        output.pop();
+        calcOperations(operand2, operand1, temp.top().type, result);
         temp.pop();
-        output->push(result);
+        output.emplace(result);
     }
 }
 
-void Model::functionProcessing() {
-    value_type result = 0;
-
-    calcFunctions(result);
-    output->pop();
-    output->push(result);
-}
-
-void Model::calcFunctions(value_type& result) {
-    type_t type = output->getType();
-    value_type x = output->getData();
-
-    if (type == COS) {
-        result = cos(x);
-    } else if (type == SIN) {
-        result = sin(x);
-    } else if (type == TAN) {
-        result = tan(x);
-    } else if (type == ACOS) {
-        result = acos(x);
-    } else if (type == ASIN) {
-        result = asin(x);
-    } else if (type == ATAN) {
-        result = atan(x);
-    } else if (type == SQRT) {
-        result = sqrt(x);
-    } else if (type == LN) {
-        result = log(x);
-    } else if (type == LOG) {
-        result = log10(x);
+long double Model::calcFunctions(int type, long double x) {
+    if (type == kCos) {
+        return cos(x);
+    } else if (type == kSin) {
+        return sin(x);
+    } else if (type == kTan) {
+        return tan(x);
+    } else if (type == kAcos) {
+        return acos(x);
+    } else if (type == kAsin) {
+        return asin(x);
+    } else if (type == kAtan) {
+        return atan(x);
+    } else if (type == kSqrt) {
+        return sqrt(x);
+    } else if (type == kLn) {
+        return log(x);
+    } else if (type == kLog) {
+        return log10(x);
     }
 }
 
-void Model::calcOperations(value_type& operand1, value_type& operand2, type_t type, value_type& result) {
-    if (type == PLUS) {
+void Model::calcOperations(long double& operand1, long double& operand2, int type, long double& result) {
+    if (type == kPlus) {
         result = operand1 + operand2;
-    } else if (type == MINUS) {
+    } else if (type == kMinus) {
         result = operand1 - operand2;
-    } else if (type == MULT) {
+    } else if (type == kMult) {
         result = operand1 * operand2;
-    } else if (type == DIV) {
+    } else if (type == kDiv) {
         result = operand1 / operand2;
-    } else if (type == POWER) {
+    } else if (type == kPower) {
         result = pow(operand1, operand2);
-    } else if (type == MOD) {
+    } else if (type == kMod) {
         result = fmod(operand1, operand2);
     }
 }
 
 void Model::toDouble() {
-    Stack temp;
+    std::stack<StackNode> temp;
 
-    if (output->size() == 1 || (output->size() == 2 && isOperator(output->getType()))) {
-        if (isFunction(output->getType())) {
-            functionProcessing();
-            str = std::to_string(output->getData());
-        } else if (isOperator(output->getType())) {
+    if (output.size() == 1 || (output.size() == 2 && isOperator(output.top().type))) {
+        if (isOperator(output.top().type)) {
             str = "ERROR";
         }
     } else {
-        while (output->size() > 1 || temp.size() > 0) {
-            if (isOperator(output->getType())) {
-                temp.spliceOperators(*output);
-            } else if (isFunction(output->getType())) {
-                functionProcessing();
-            } else if ((output->size() <= 1 && temp.size() > 0) || (output->getType() == NUMBER && temp.getType() == NUMBER)) {
-                output->spliceNumbers(temp);
-            } else if (output->getType() == NUMBER) {
+        while (output.size() > 1 || temp.size() > 0) {
+            if (isOperator(output.top().type)) {
+                spliceOperators(output, temp);
+            } else if ((output.size() <= 1 && temp.size() > 0) || (output.top().type == kNumber && temp.top().type == kNumber)) {
+                spliceNumbers(temp, output);
+            } else if (output.top().type == kNumber) {
                 numberProcessing(temp);
             }
         }
     }
     if (str != "ERROR") {
-        str = std::to_string(output->getData());
+        str = std::to_string(output.top().data);
     }
 }
 
@@ -463,13 +408,32 @@ std::string Model::getResult() const {
     return str;
 }
 
-void Model::setValues(std::string newString, value_type x)
+void Model::setValues(std::string newString, long double x)
 {
     str = newString;
     it = str.begin();
     xValue = x;
-    output->clear();
-    operators->clear();
+    while (output.size() != 0)
+    {
+        output.pop();
+    }
+    while (operators.size() != 0)
+    {
+        operators.pop();
+    }
+}
+
+void Model::replaceX()
+{
+    std::stringstream ss;
+    ss << xValue;
+    std::string replacementStr = ss.str();
+    size_t pos = 0;
+
+    while ((pos = str.find('x', pos)) != std::string::npos) {
+        str.replace(pos, 1, replacementStr);
+        pos += replacementStr.length();
+    }
 }
 
 }  // namespace s21

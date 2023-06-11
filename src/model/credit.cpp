@@ -2,7 +2,7 @@
 
 namespace s21 {
 
-Model::Model(value_type amount, value_type percent, int period, int type) 
+Model::Model(long double amount, long double percent, int period, int type) 
     : amount(amount)
     , percent(percent)
     , period(period)
@@ -12,53 +12,58 @@ Model::Model(value_type amount, value_type percent, int period, int type)
 void Model::CreditCalculator() 
 {
     if (type == ANNUITY) {
-        long double rate = percent / (long double)1200;
-        long double x = rate * pow(rate + 1, (long double)period) /
-                        (pow(rate + 1, (long double)period) - 1);
+        long double rate = percent / static_cast<long double>(1200);
+        long double x = rate * pow(rate + 1, static_cast<long double>(period)) /
+                        (pow(rate + 1, static_cast<long double>(period)) - 1);
 
-        payment = round(x * amount * 100) / 100;
+        payment = dround(x * amount, 2);
     } else if (type == DIFFERENTIATED) {
-        long double rate = amount / (long double)period;
+        long double rate = amount / static_cast<long double>(period);
 
-        max = round((rate + amount * percent * 30.42 / 36524.25) * 100) / 100;
-        min = round((rate + rate * percent * 30.42 / 36524.25) * 100) / 100;
-        payment = round((max + min) / 2 * 100) / 100;
+        max = dround((rate + amount * percent * avg_t::kAvgDaysInMonths / avg_t::kAvgDaysInYear), 2);
+        min = dround((rate + rate * percent * avg_t::kAvgDaysInMonths / avg_t::kAvgDaysInYear), 2);
+        payment = dround((max + min) / 2, 2);
     }
-    totalPayment = round(payment * (long double)period * 100) / 100;
-    overpayment = round((totalPayment - amount) * 100) / 100;
+    totalPayment = dround(payment * static_cast<long double>(period), 2);
+    overpayment = dround((totalPayment - amount), 2);
 }
 
-typename Model::reference Model::getPayment() 
+long double& Model::getPayment() 
 {
     return payment;
 }
 
-typename Model::reference Model::getOverpayment() 
+long double& Model::getOverpayment() 
 {
     return overpayment;
 }
 
-typename Model::reference Model::getTotalPayment() 
+long double& Model::getTotalPayment() 
 {
     return totalPayment;
 }
 
-typename Model::reference Model::getMax() 
+long double& Model::getMax() 
 {
     return max;
 }
 
-typename Model::reference Model::getMin() 
+long double& Model::getMin() 
 {
     return min;
 }
 
-void Model::setValues(value_type amount, value_type percent, int period, int type)
+void Model::setValues(long double amount, long double percent, int period, int type)
 {
     this->amount = amount;
     this->percent = percent;
     this->period = period;
     this->type = type;
+}
+
+long double Model::dround(long double &&x, int&& digits)
+{
+    return std::round(x * std::pow(10, digits)) / std::pow(10, digits);
 }
 
 }  // namespace s21
