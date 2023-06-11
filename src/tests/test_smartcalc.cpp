@@ -192,6 +192,11 @@ TEST(SMART_CALCULATOR, NUMBERS38) {
     model.SmartCalculator();
     ASSERT_EQ(model.getResult(), to_string(-0.015625));
 }
+TEST(SMART_CALCULATOR, NUMBERS39) {
+    Model model(".");
+    model.SmartCalculator();
+    ASSERT_EQ(model.getResult(), "ERROR");
+}
 
 TEST(SMART_CALCULATOR, X1) {
  Model model("x", 2.5);
