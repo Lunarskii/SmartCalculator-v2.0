@@ -1,31 +1,43 @@
 #ifndef CPP3_SMARTCALC_V2_0_CONTROLLER_CONTROLLER_H_
 #define CPP3_SMARTCALC_V2_0_CONTROLLER_CONTROLLER_H_
 
+#include <QObject>
 #include "../model/model.h"
+#include "../view/view.h"
 
 namespace s21 {
 
-class Controller 
+class Controller : public QObject
 {
-public:
-    Controller(Model* m) : model(m) {}
+    Q_OBJECT
 
-    void setSmartCalculatorData(std::string e, long double xValue);
-    void setCreditCalculatorData(long double amount, long double percent, int period, int type);
-    void setDepositCalculatorData(long double amount, int period, long double rate, long double taxRate, long double paymentFrequency, bool capitalization);
-    void addDeposit(long double amount, int frequency);
-    void addWithdrawal(long double amount, int frequency);
-    long double& getPayment();
-    long double& getOverpayment();
-    long double& getTotalPayment();
-    long double& getMax();
-    long double& getMin();
-    long double& getEarnedInterest();
-    long double& getTax();
-    long double& getAmount();
-    std::string getResult();
+public:
+    explicit Controller(Model* m, View* v) 
+        : model_(m)
+        , view_(v)
+    {
+        QObject::connect(view_, SIGNAL(SetModel(std::string, long double)), this, SLOT(SetModel_(std::string, long double)));
+        QObject::connect(view_, SIGNAL(SetModel(CreditData)), this, SLOT(SetModel_(CreditData)));
+        QObject::connect(view_, SIGNAL(SetModel(DepositData)), this, SLOT(SetModel_(DepositData)));
+        QObject::connect(view_, SIGNAL(AddDeposit(long double, int)), this, SLOT(AddDeposit_(long double, int)));
+        QObject::connect(view_, SIGNAL(AddWithdrawal(long double, int)), this, SLOT(AddWithdrawal_(long double, int)));
+    }
+
+signals:
+    void SolutionReady(std::string result);
+    void SolutionReady(CreditResult credit_result);
+    void SolutionReady(DepositResult deposit_result);
+
+private slots:
+    void SetModel_(std::string e, long double x);
+    void SetModel_(CreditData credit_data);
+    void SetModel_(DepositData deposit_data);
+    void AddDeposit_(long double amount, int frequency);
+    void AddWithdrawal_(long double amount, int frequency);
+
 private:
-    Model* model;
+    Model* model_;
+    View* view_;
 };
 
 }  // namespace s21
