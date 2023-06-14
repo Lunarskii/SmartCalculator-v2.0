@@ -5,11 +5,16 @@ project(untitled VERSION 0.1 LANGUAGES CXX)
 set(CMAKE_PREFIX_PATH "/usr/local/qt;/opt/qt;$ENV{QT_INSTALL_DIR};$ENV{QTDIR};~/Qt/")
 set(CMAKE_PREFIX_PATH "/home/lunarskii/Qt/6.4.2/gcc_64/lib/cmake")
 
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
+set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_FLAGS "--coverage")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
@@ -18,56 +23,41 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Gui)
 find_package(GTest REQUIRED)
 include_directories(${GTEST_INCLUDE_DIRS})
 
-set(PROJECT_SOURCES
-        model/smart.cpp
-        model/credit.cpp
-        model/deposit.cpp
-        model/stack.cpp
-        model/model.h
-
-        view/view.cpp
-        view/view.h
-        view/smartview.cpp
-        view/smartview.h
-        view/creditview.cpp
-        view/creditview.h
-        view/depositview.cpp
-        view/depositview.h
-        view/qcustomplot.cpp
-        view/qcustomplot.h
-
-        view/.ui/view.ui
-        view/.ui/smartview.ui
-        view/.ui/creditview.ui
-        view/.ui/depositview.ui
-
-        view/.ui/ui_view.h
-        view/.ui/ui_smartview.h
-        view/.ui/ui_creditview.h
-        view/.ui/ui_depositview.h
-
-        controller/controller.cpp
-        controller/controller.h
-
-        main.cpp
+set(PROJECT_DIRS
+        model/
+        controller/
+        view/
+        .
+)
+set(TEST_DIRS
+        model/
+        tests/
 )
 
-set(TEST_SOURCES
-        model/smart.cpp
-        model/credit.cpp
-        model/deposit.cpp
-        model/stack.cpp
-        model/model.h
+set(PROJECT_SOURCES "")
+set(TEST_SOURCES "")
 
-        tests/test_core.cpp
-        tests/test_core.h
-        tests/test_smartcalc.cpp
-        tests/test_creditcalc.cpp
-        tests/test_depositcalc.cpp
-)
+foreach(dir ${PROJECT_DIRS})
+    file(GLOB CPP_SOURCES "${dir}/*.cpp")
+    file(GLOB HEADER_SOURCES "${dir}/*.h")
+    file(GLOB UI_SOURCES "${dir}/*.ui")
+    list(APPEND PROJECT_SOURCES ${CPP_SOURCES} ${HEADER_SOURCES} ${UI_SOURCES})
+endforeach()
+
+foreach(dir ${TEST_DIRS})
+    file(GLOB CPP_SOURCES "${dir}/*.cpp")
+    file(GLOB HEADER_SOURCES "${dir}/*.h")
+    list(APPEND TEST_SOURCES ${CPP_SOURCES} ${HEADER_SOURCES})
+endforeach()
 
 add_executable(tests 
         ${TEST_SOURCES}
+)
+
+add_custom_target(coverage
+  COMMAND lcov --directory . --capture --output-file coverage.info
+  COMMAND lcov --remove coverage.info '/usr/*' --output-file coverage.info
+  COMMAND lcov --list coverage.info
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
