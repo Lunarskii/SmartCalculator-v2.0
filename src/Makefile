@@ -1,19 +1,7 @@
 VALGRIND_FLAGS				= --log-file="valgrind.txt" --track-origins=yes --trace-children=yes --leak-check=full --leak-resolution=med
 APP_NAME					= SmartCalculator
 
-all: install
-
-build:
-	g++ -c model/*.cpp
-	ar rc lib.a *.o
-	ranlib lib.a
-	rm -rf *.o
-	g++ -c tests/*.cpp
-	g++ *.o -o test_test lib.a -DGTEST_HAS_PTHREAD=1 -lgtest
-	rm -rf *.o
-	./test_test
-	rm -rf test_test
-	rm -rf lib.a
+all: install tests dvi dist lcov 
 
 install:
 	cmake -B build
@@ -27,6 +15,7 @@ uninstall: clean
 
 clean:
 	rm -rf valgrind.txt
+	rm -rf coverage*
 
 dvi:
 	open README.md
@@ -41,9 +30,17 @@ tests: install
 	make -C build tests
 	./build/tests
 
+lcov: tests
+	make -C build coverage
+	cp build/coverage.info .
+	genhtml coverage.info --output-directory coverage_report
+	open coverage_report/index.html
+
 clang:
 	clang-format --style=google -i controller/*
 	clang-format --style=google -i model/*
-	clang-format --style=google -i view/*view*
+	clang-format --style=google -i view/*.cpp view/*.h
+	clang-format --style=google -i structures.h type_predicates.h main.cpp
+	clang-format --style=google -i tests/*
 
-.PHONY: all install uninstall clean dvi dist launch tests clang valgrind
+.PHONY: all install uninstall clean dvi dist launch tests clang valgrind lcov
