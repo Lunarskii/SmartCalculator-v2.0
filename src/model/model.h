@@ -1,173 +1,82 @@
 #ifndef CPP3_SMARTCALC_V2_0_MODEL_MODEL_H_
 #define CPP3_SMARTCALC_V2_0_MODEL_MODEL_H_
 
-#include <cstddef> // для size_t
-#include <string> // для std::string
-#include <cstring> // для strncmp
-#include <algorithm> // для remove_if
-#include <stdexcept> // для выдачи исключений
-#include <cmath>    // для математическиих функций
+#include <algorithm>
+#include <cmath>
 #include <list>
-
-#include <iostream> // удалить если не нужнааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааааа
 #include <stack>
 #include <sstream>
 
-namespace s21 {
+#include "../structures.h"
+#include "../type_predicates.h"
 
-#define ANNUITY 1
-#define DIFFERENTIATED 2
+namespace s21 {
 
 class Model 
 {
 public:
-    class StackNode
-    {
-    public:
-        StackNode(const long double& d, const int& priority = 0, int t = kNumber)
-            : data(d)
-            , priority(priority)
-            , type(t) 
-        {}
-        long double data;
-        int priority;
-        int type;
-    };
-
-    class ListNode
-    {
-    public:
-        ListNode(double amount, int frequency)
-            : amount(amount)
-            , frequency(frequency) 
-        {}
-        double amount;
-        int frequency;
-    };
-
     Model() = default;
-    Model(std::string s);
-    Model(std::string s, long double x);
-    Model(Model& other);
+    Model(std::string s, long double x = 0);
     ~Model() = default;
 
-    bool isDec() const;
-    bool isDec(char c) const;
-    bool isX() const;
-    bool isX(char c) const;
-    bool isFuncChar() const;
-    bool isSign() const;
-    bool isSign(char c) const;
-    bool isOp() const;
-    bool isMod() const;
-    bool isDot() const;
-    bool isDot(char c) const;
-    bool isExp() const;
-    bool isExp(char c) const;
-    bool isUnaryOp();
-    bool isNumber();
-    bool isFunc(int& funcType);
-    bool isWrongBrackets() const;
-    bool isWrongSigns() const;
-    bool isWrongX() const;
-
     void SmartCalculator();
-    bool toPolishNotation();
-    void toDouble();
-    std::string getResult() const;
-
-    int detPriority(char c) const;
-    int detOp(char c) const;
-
-    bool appendFunc(int& funcType);
-    void appendOp();
-    void appendBracket();
-    void splice();
-    void spliceFull();
-
-    void numberProcessing(std::stack<StackNode>& temp);
-    long double calcFunctions(int type, long double x);
-    void calcOperations(long double& operand1, long double& operand2, int type, long double& result);
-
-    void setValues(std::string newString, long double x);
-
-    void moveElement(std::stack<StackNode>& src, std::stack<StackNode>& dest);
-    void spliceOperators(std::stack<StackNode>& src, std::stack<StackNode>& dest);
-    void spliceNumbers(std::stack<StackNode>& src, std::stack<StackNode>& dest);
-    void replaceX();
+    std::string GetResult() const;
+    void SetValues(std::string new_string, long double x);
+private:
+    bool IsUnaryOp_();
+    bool IsWrongBrackets_() const;
+    bool IsWrongX_() const;
+    bool AppendIfNumber_();
+    bool AppendIfFunc_();
+    bool ToPolishNotation_();
+    void ToDouble_();
+    int DetPriority_(char c) const;
+    int DetOp_(char c) const;
+    void AppendOp_();
+    void AppendBracket_();
+    void Splice_();
+    void SpliceFull_();
+    void NumberProcessing_(std::stack<StackNode>& temp);
+    long double CalcFunctions_(int type, long double x);
+    long double CalcOperations_(long double& operand1, long double& operand2, int type);
+    void MoveElement_(std::stack<StackNode>& src, std::stack<StackNode>& dest);
+    void SpliceOperators_(std::stack<StackNode>& src, std::stack<StackNode>& dest);
+    void SpliceNumbers_(std::stack<StackNode>& src, std::stack<StackNode>& dest);
+    void ReplaceX_();
+    std::size_t GetCountNumbersOfOperators_();
     inline bool isOperator(int type) { return type >= kPlus && type <= kMod; }
 private:
     std::string str{};
     std::string::iterator it{str.begin()};
-    long double xValue{};
+    long double x{};
     std::stack<StackNode> output;
     std::stack<StackNode> operators;
-    
-    enum type_t {
-        kNumber = 0,
-        kPlus = 1,
-        kMinus = 2,
-        kMult = 3,
-        kDiv = 4,
-        kPower = 5,
-        kMod = 6,
-        kCos = 11,
-        kSin = 12,
-        kTan = 13,
-        kAcos = 14,
-        kAsin = 15,
-        kAtan = 16,
-        kSqrt = 17,
-        kLn = 18,
-        kLog = 19,
-        kLbracket = 20
-    };
 
 public:
-    Model(long double amount, long double percent, int period, int type);
+    Model(long double amount, long double rate, int period, int type);
     void CreditCalculator();
-    long double& getPayment();
-    long double& getOverpayment();
-    long double& getTotalPayment();
-    long double& getMax();
-    long double& getMin();
-    void setValues(long double amount, long double percent, int period, int type);
-    long double dround(long double &&x, int&& digits);
+    void SetValues(CreditData credit_data);
+    CreditResult GetCreditResult();
 private:
-    long double amount{};
-    long double percent{};
-    long double payment{};
-    long double overpayment{};
-    long double totalPayment{};
-    long double max{};
-    long double min{};
-    int period{};
-    int type{};
-
-    struct avg_t {
-        static constexpr long double kAvgDaysInMonths = 30.42;
-        static constexpr long double kAvgDaysInYear = 36524.25;
-    };
+    long double Round_(long double &&x, int&& digits);
+private:
+    CreditData credit_data{};
+    CreditResult credit_result{};
 
 public:
-    Model(long double amount, int period, long double rate, long double taxRate, long double paymentFrequency, bool capitalization);
+    Model(long double amount, int period, long double rate, long double tax_rate, long double frequency, bool capitalization);
     void DepositCalculator();
-    void pushDeposit(long double amount, int frequency);
-    void pushWithdrawal(long double amount, int frequency);
-    long double& getEarnedInterest();
-    long double& getTax();
-    long double& getAmount();
-    void setValues(long double amount, int period, long double rate, long double taxRate, long double paymentFrequency, bool capitalization);
+    void PushDeposit(long double amount, int frequency);
+    void PushWithdrawal(long double amount, int frequency);
+    void SetValues(DepositData deposit_data);
+    DepositResult GetDepositResult();
 private:
-    long double getInterest();
-    long double rate{};
-    long double taxRate{};
-    long double paymentFrequency{};
-    bool capitalization{};
+    long double GetInterest_();
+private:
     std::list<ListNode> deposits;
     std::list<ListNode> withdrawals;
-    long double interest{};
-    long double tax{};
+    DepositData deposit_data{};
+    DepositResult deposit_result{};
 };
 
 }  // namespace s21

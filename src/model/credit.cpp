@@ -2,68 +2,49 @@
 
 namespace s21 {
 
-Model::Model(long double amount, long double percent, int period, int type) 
-    : amount(amount)
-    , percent(percent)
-    , period(period)
-    , type(type) 
-{}
+Model::Model(long double amount, long double rate, int period, int type) 
+{
+    this->credit_data.amount = amount;
+    this->credit_data.rate = rate;
+    this->credit_data.period = period;
+    this->credit_data.type = type;
+}
 
 void Model::CreditCalculator() 
 {
-    if (type == ANNUITY) {
-        long double rate = percent / static_cast<long double>(1200);
-        long double x = rate * pow(rate + 1, static_cast<long double>(period)) /
-                        (pow(rate + 1, static_cast<long double>(period)) - 1);
+    if (credit_data.type == kAnnuity) {
+        long double rate = credit_data.rate / static_cast<long double>(1200);
+        long double x = rate * pow(rate + 1, static_cast<long double>(credit_data.period)) /
+                        (pow(rate + 1, static_cast<long double>(credit_data.period)) - 1);
 
-        payment = dround(x * amount, 2);
-    } else if (type == DIFFERENTIATED) {
-        long double rate = amount / static_cast<long double>(period);
+        credit_result.payment = Round_(x * credit_data.amount, 2);
+    } else if (credit_data.type == kDifferentiated) {
+        long double rate = credit_data.amount / static_cast<long double>(credit_data.period);
 
-        max = dround((rate + amount * percent * avg_t::kAvgDaysInMonths / avg_t::kAvgDaysInYear), 2);
-        min = dround((rate + rate * percent * avg_t::kAvgDaysInMonths / avg_t::kAvgDaysInYear), 2);
-        payment = dround((max + min) / 2, 2);
+        credit_result.max_payment = Round_((rate + credit_data.amount * credit_data.rate * Avg::kAvgDaysInMonths / Avg::kAvgDaysInYear), 2);
+        credit_result.min_payment = Round_((rate + rate * credit_data.rate * Avg::kAvgDaysInMonths / Avg::kAvgDaysInYear), 2);
+        credit_result.payment = Round_((credit_result.max_payment + credit_result.min_payment) / 2, 2);
     }
-    totalPayment = dround(payment * static_cast<long double>(period), 2);
-    overpayment = dround((totalPayment - amount), 2);
+    credit_result.total_payment = Round_(credit_result.payment * static_cast<long double>(credit_data.period), 2);
+    credit_result.overpayment = Round_((credit_result.total_payment - credit_data.amount), 2);
 }
 
-long double& Model::getPayment() 
+void Model::SetValues(CreditData credit_data)
 {
-    return payment;
+    this->credit_data.amount = credit_data.amount;
+    this->credit_data.rate = credit_data.rate;
+    this->credit_data.period = credit_data.period;
+    this->credit_data.type = credit_data.type;
 }
 
-long double& Model::getOverpayment() 
-{
-    return overpayment;
-}
-
-long double& Model::getTotalPayment() 
-{
-    return totalPayment;
-}
-
-long double& Model::getMax() 
-{
-    return max;
-}
-
-long double& Model::getMin() 
-{
-    return min;
-}
-
-void Model::setValues(long double amount, long double percent, int period, int type)
-{
-    this->amount = amount;
-    this->percent = percent;
-    this->period = period;
-    this->type = type;
-}
-
-long double Model::dround(long double &&x, int&& digits)
+long double Model::Round_(long double &&x, int&& digits)
 {
     return std::round(x * std::pow(10, digits)) / std::pow(10, digits);
+}
+
+CreditResult Model::GetCreditResult()
+{
+    return credit_result;
 }
 
 }  // namespace s21

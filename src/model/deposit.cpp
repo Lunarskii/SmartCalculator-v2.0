@@ -2,106 +2,93 @@
 
 namespace s21 {
 
-Model::Model(long double amount, int period, long double rate, long double taxRate, long double paymentFrequency, bool capitalization) 
-    : amount(amount)
-    , period(period)
-    , rate(rate)
-    , taxRate(rate)
-    , paymentFrequency(paymentFrequency)
-    , capitalization(capitalization) 
+Model::Model(long double amount, int period, long double rate, long double tax_rate, long double frequency, bool capitalization) 
 {
-    this->rate /= 100;
-    this->taxRate /= 100;
-    interest = 0;
+    this->deposit_result.amount = amount;
+    this->deposit_data.period = period;
+    this->deposit_data.rate = rate / 100;
+    this->deposit_data.tax_rate = tax_rate / 100;
+    this->deposit_data.frequency = frequency;
+    this->deposit_data.capitalization = capitalization;
 }
 
-void Model::pushDeposit(long double amount, int frequency)
+void Model::PushDeposit(long double amount, int frequency)
 {
     deposits.emplace_back(amount, frequency);
 }
 
-void Model::pushWithdrawal(long double amount, int frequency)
+void Model::PushWithdrawal(long double amount, int frequency)
 {
     withdrawals.emplace_back(amount, frequency);
 }
 
-long double Model::getInterest()
+long double Model::GetInterest_()
 {   
-    return amount * rate / paymentFrequency;
-}
-
-long double& Model::getEarnedInterest()
-{
-    return interest;
-}
-
-long double& Model::getTax()
-{
-    return tax;
-}
-
-long double& Model::getAmount()
-{
-    return amount;
+    return deposit_result.amount * deposit_data.rate / deposit_data.frequency;
 }
 
 void Model::DepositCalculator()
 {
-    for (int i = 1; i <= period; ++i) 
+    for (int i = 1; i <= deposit_data.period; ++i) 
     {
-        if ((paymentFrequency == 1 && i % 12 == 0)
-            || (paymentFrequency == 2 && i % 6 == 0)
-            || paymentFrequency == 12
-            || i == period)
+        if ((deposit_data.frequency == 1 && i % 12 == 0)
+            || (deposit_data.frequency == 2 && i % 6 == 0)
+            || deposit_data.frequency == 12
+            || i == deposit_data.period)
         {
-            if (i == period && !(i % 6 == 0 || i % 12 == 0))
+            if (i == deposit_data.period && !(i % 6 == 0 || i % 12 == 0))
             {
-                if (paymentFrequency == 2) 
+                if (deposit_data.frequency == 2) 
                 {
-                    paymentFrequency += fmod(period, 6) / 12;
+                    deposit_data.frequency += fmod(deposit_data.period, 6) / 12;
                 } 
-                else if (paymentFrequency == 1) 
+                else if (deposit_data.frequency == 1) 
                 {
-                    paymentFrequency += 1 - (fmod(period, 12) / 12);
+                    deposit_data.frequency += 1 - (fmod(deposit_data.period, 12) / 12);
                 }
             }
-            interest += getInterest();
+            deposit_result.interest += GetInterest_();
 
-            if (capitalization) 
+            if (deposit_data.capitalization) 
             {
-                amount += getInterest();
+                deposit_result.amount += GetInterest_();
             }
         }
 
         for (const auto& deposit : deposits) {
             if (i % deposit.frequency == 0) {
-                amount += deposit.amount;
+                deposit_result.amount += deposit.amount;
             }
         }
         for (const auto& withdrawal : withdrawals) {
             if (i % withdrawal.frequency == 0) {
-                amount -= withdrawal.amount;
+                deposit_result.amount -= withdrawal.amount;
             }
         }
     }
-    if (rate > 0.125)
+    if (deposit_data.rate > 0.125)
     {
-        tax = interest * taxRate;
+        deposit_result.tax = deposit_result.interest * deposit_data.tax_rate;
     }
     deposits.clear();
     withdrawals.clear();
 }
 
-void Model::setValues(long double amount, int period, long double rate, long double taxRate, long double paymentFrequency, bool capitalization)
+void Model::SetValues(DepositData deposit_data)
 {
-    this->amount = amount;
-    this->period = period;
-    this->rate = rate / 100;
-    this->taxRate = taxRate / 100;
-    this->paymentFrequency = paymentFrequency;
-    this->capitalization = capitalization;
-    this->interest = 0;
-    this->tax = 0;
+    this->deposit_result.amount = deposit_data.amount;
+    this->deposit_data.period = deposit_data.period;
+    this->deposit_data.rate = deposit_data.rate / 100;
+    this->deposit_data.tax_rate = deposit_data.tax_rate / 100;
+    this->deposit_data.frequency = deposit_data.frequency;
+    this->deposit_data.capitalization = deposit_data.capitalization;
+    deposit_result.interest = 0;
+    deposit_result.tax = 0;
+}
+
+DepositResult Model::GetDepositResult()
+{
+    return deposit_result;
 }
 
 }  // namespace s21
